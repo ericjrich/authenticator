@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#20240127_1051_est_EJR
+#20240207_0921_est_EJR
 # 2 factors auth
 
 ### Do First ###
@@ -22,10 +22,7 @@
 
 #..funcs.......................................................................................
 control_loop() { while true; do read -n 1 input < /dev/tty; if [[ "${input,,}" == 'q' ]]; then clear; kill $(jobs -p); break; fi; done; }
-background_loop() {
-  while true; do clear; zotp=$(oathtool --base32 --totp "$zseed"); echo -e "\e[32m\e[2m$zinfo\e[0m"; echo -e "\nOTP FOR \e[36m\e[1m$zname\e[0m (Copied To Clipboard):\n\e[33m$(figlet $zotp)\e[0m"; echo -e "\n**Press \e[5m( Q )\e[0m To Leave**"
-  if [ "$zotp" != "$last_otp" ]; then echo -n "$zotp" | xclip -selection clipboard
-  last_otp="$zotp"; fi; sleep 1; done; }
+background_loop() { while true; do clear; zotp=$(oathtool --base32 --totp "$zseed"); current_time=$(date +%s); next_interval=$((current_time + 30 - (current_time % 30))); remaining=$((next_interval - current_time)); echo -e "\e[32m\e[2m$zinfo\e[0m\n\nOTP FOR \e[36m\e[1m$zname\e[0m (Copied To Clipboard):\n\e[33m$(figlet $zotp)\e[0m\n\n**Press \e[5m( Q )\e[0m To Leave**"; printf "\nTime until next code: %02d:%02d\n" $((remaining / 60)) $((remaining % 60)); if [ "$zotp" != "$last_otp" ]; then echo -n "$zotp" | xclip -selection clipboard; last_otp="$zotp"; fi; sleep 1; done; }
 
 #..vars........................................................................................
   keys="1234567890qwertyuiopasdfghjklzxcvbnm"; IFS=','; line_num=0; declare -A menu_options
